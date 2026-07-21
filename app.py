@@ -1,26 +1,43 @@
-from flask import Flask, render_template, send_file
-import os
+from flask import Flask, render_template, request, jsonify, send_file
+import requests
+import re
 
 app = Flask(__name__)
 
-# Sample video file (replace with your own or use a public URL)
-# For demonstration, we use a small placeholder video from the web.
-SAMPLE_VIDEO_URL = "https://www.w3schools.com/html/mov_bbb.mp4"
+def extract_video_id(url):
+    pattern = r"(?:v=|\/)([0-9A-Za-z_-]{11})(?:[?&#]|$)"
+    match = re.search(pattern, url)
+    return match.group(1) if match else None
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html', video_url=SAMPLE_VIDEO_URL)
-
-# Dummy download endpoints – in a real app you would generate/retrieve the file
-@app.route('/download/low')
-def download_low():
-    # Simulate a low-quality 2MB video (here we just redirect to a sample)
-    # In reality, you would serve a compressed version.
-    return send_file('static/sample_low.mp4', as_attachment=True)
-
-@app.route('/download/high')
-def download_high():
-    return send_file('static/sample_high.mp4', as_attachment=True)
+    video_data = None
+    error = None
+    if request.method == 'POST':
+        url = request.form.get('url')
+        video_id = extract_video_id(url)
+        if not video_id:
+            error = "Invalid YouTube URL"
+        else:
+            # Use free API to get download links
+            api_url = f"https://api.vevioz.com/api/button/mp3/{video_id}"
+            try:
+                resp = requests.get(api_url, timeout=10)
+                data = resp.json()
+                if data.get('status') == 'ok':
+                    video_data = {
+                        'title': data.get('title'),
+                        'thumbnail': data.get('thumbnail'),
+                        'low_audio': data.get('audio', {}).get('low'),   # ~2MB
+                        'high_audio': data.get('audio', {}).get('high'),
+                        'low_video': data.get('video', {}).get('low'),
+                        'high_video': data.get('video', {}).get('high')
+                    }
+                else:
+                    error = "Could not fetch video. Try another link."
+            except Exception as e:
+                error = f"API error: {str(e)}"
+    return render_template('index.html', video=video_data, error=error)
 
 if __name__ == '__main__':
     app.run(debug=True)

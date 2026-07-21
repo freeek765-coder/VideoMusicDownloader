@@ -2,45 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Music Downloader</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>YouTube Music Downloader</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background: #121212; color: #fff; display: flex; justify-content: center; padding: 20px; }
+        .container { max-width: 640px; width: 100%; background: #1e1e1e; border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        h1 { text-align: center; margin-bottom: 20px; color: #ff4444; }
+        input[type="text"] { width: 100%; padding: 14px; border-radius: 30px; border: none; background: #2a2a2a; color: #fff; font-size: 1rem; outline: none; }
+        button { width: 100%; margin-top: 10px; padding: 14px; border: none; border-radius: 30px; background: #ff4444; color: #fff; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
+        .error { color: #ff6b6b; margin: 10px 0; }
+        .video-card { margin-top: 20px; background: #2a2a2a; border-radius: 16px; padding: 15px; }
+        .video-card img { width: 100%; border-radius: 12px; }
+        .video-card h3 { margin: 10px 0; font-size: 1.2rem; }
+        .download-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .download-grid a { display: block; text-align: center; padding: 12px; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 0.9rem; }
+        .low { background: #e94560; color: #fff; }
+        .high { background: #0f3460; color: #fff; }
+        .note { margin-top: 15px; font-size: 0.8rem; color: #aaa; text-align: center; }
+        footer { margin-top: 30px; text-align: center; font-size: 0.8rem; color: #555; }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>🎵 Music Downloader</h1>
-        <div class="video-wrapper">
-            <video id="videoPlayer" controls poster="https://via.placeholder.com/640x360.png?text=Music+Video">
-                <source src="{{ video_url }}" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-        </div>
-
-        <div class="actions">
-            <button id="watchBtn">▶ Watch Video</button>
-        </div>
-
-        <div class="download-section">
-            <h3>Download Song</h3>
-            <div class="download-buttons">
-                <a href="{{ url_for('download_low') }}" class="btn low">📥 Low Quality (≈2 MB)</a>
-                <a href="{{ url_for('download_high') }}" class="btn high">📥 High Quality</a>
+        <form method="POST">
+            <input type="text" name="url" placeholder="Paste YouTube link here..." required>
+            <button type="submit">🔍 Get Video</button>
+        </form>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+        {% if video %}
+        <div class="video-card">
+            <img src="{{ video.thumbnail }}" alt="Thumbnail">
+            <h3>{{ video.title }}</h3>
+            <p style="color:#aaa; font-size:0.9rem;">Choose your download:</p>
+            <div class="download-grid">
+                <a href="{{ video.low_audio }}" class="low" target="_blank">🎧 Audio (Low)</a>
+                <a href="{{ video.high_audio }}" class="high" target="_blank">🎧 Audio (High)</a>
+                <a href="{{ video.low_video }}" class="low" target="_blank">📹 Video (Low)</a>
+                <a href="{{ video.high_video }}" class="high" target="_blank">📹 Video (High)</a>
             </div>
-            <p class="note">After download, save to your device's Gallery / Music folder.</p>
+            <p class="note">⬇️ Clicking will download directly – save to your device's Gallery/Music folder.</p>
         </div>
+        {% endif %}
+        <footer>Powered by free API – may have limits</footer>
     </div>
-
-    <script>
-        document.getElementById('watchBtn').addEventListener('click', function() {
-            const video = document.getElementById('videoPlayer');
-            if (video.paused) {
-                video.play();
-                this.textContent = '⏸ Pause';
-            } else {
-                video.pause();
-                this.textContent = '▶ Watch Video';
-            }
-        });
-    </script>
 </body>
-  </html>
+</html>

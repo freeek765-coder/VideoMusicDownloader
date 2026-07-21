@@ -1,1 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Music Downloader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Music Downloader</h1>
+        <div class="video-wrapper">
+            <video id="videoPlayer" controls poster="https://via.placeholder.com/640x360.png?text=Music+Video">
+                <source src="{{ video_url }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
 
+        <div class="actions">
+            <button id="watchBtn">▶ Watch Video</button>
+        </div>
+
+        <div class="download-section">
+            <h3>Download Song</h3>
+            <div class="download-buttons">
+                <a href="{{ url_for('download_low') }}" class="btn low">📥 Low Quality (≈2 MB)</a>
+                <a href="{{ url_for('download_high') }}" class="btn high">📥 High Quality</a>
+            </div>
+            <p class="note">After download, save to your device's Gallery / Music folder.</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('watchBtn').addEventListener('click', function() {
+            const video = document.getElementById('videoPlayer');
+            if (video.paused) {
+                video.play();
+                this.textContent = '⏸ Pause';
+            } else {
+                video.pause();
+                this.textContent = '▶ Watch Video';
+            }
+        });
+    </script>
+</body>
+  </html>
